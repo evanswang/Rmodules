@@ -114,7 +114,7 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
         List<ExpressionRecord> kvResults = null
         try {
             // @wsc CSV writer
-            KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray-subject", dataType)
+            KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray", dataType)
             System.err.println(System.nanoTime() + "@wsc launch hbase query **************************** ")
             if (geneList == null) {
                 kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD)

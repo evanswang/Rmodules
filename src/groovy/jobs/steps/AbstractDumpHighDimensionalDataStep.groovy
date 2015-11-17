@@ -120,9 +120,11 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
                 kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD)
             } else {
                 Map geneMap = SQLModule.getGeneName(geneList)
+                // TODO: geneMap only contains gene symbol. need to retrieve probes
+                System.err.println("************** wsc print **********" + trialName + ", " + conceptCD + ", " + patientList.size() + ", " + geneMap.values().size());
                 kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD, new ArrayList<String>(geneMap.values()))
             }
-
+			System.err.println("@wsc hbase record number **************************** " + kvResults.size)
             System.err.println(System.nanoTime() + "@wsc hbase query end **************************** ")
             kvResults.each { kvr ->
                 // gene_id not complete, value is only raw type

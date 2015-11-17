@@ -81,7 +81,6 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
                 results.keySet().each { key ->
                     System.err.println(System.nanoTime() + "@wsc print result key set ****************************" + key.toString())
                     doSubsetKV(key, csvWriter)
-
                 }
             }
         }
@@ -108,18 +107,20 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
 
         //Sql command used to retrieve Assay IDs.
         System.err.println("before init sql **************************** " + ontologyTerm)
-        List<BigDecimal> patientList = SQLModule.getPatients(resultInstanceId)
-        String trialName = SQLModule.getTrial(ontologyTerm)
+        List<String> patientList = SQLModule.getPatients(resultInstanceId)
+        Map<String, String> trial_conceptcd = SQLModule.getTrialandConceptCD(ontologyTerm)
+        String trialName = trial_conceptcd.get("study_name");
+        String conceptCD = trial_conceptcd.get("concept_cd");
         List<ExpressionRecord> kvResults = null
         try {
             // @wsc CSV writer
             KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray-subject", dataType)
             System.err.println(System.nanoTime() + "@wsc launch hbase query **************************** ")
             if (geneList == null) {
-                kvResults = kvMrnaModule.getRecord(trialName, patientList)
+                kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD)
             } else {
                 Map geneMap = SQLModule.getGeneName(geneList)
-                kvResults = kvMrnaModule.getRecord(trialName, patientList, new ArrayList<String>(geneMap.values()))
+                kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD, new ArrayList<String>(geneMap.values()))
             }
 
             System.err.println(System.nanoTime() + "@wsc hbase query end **************************** ")

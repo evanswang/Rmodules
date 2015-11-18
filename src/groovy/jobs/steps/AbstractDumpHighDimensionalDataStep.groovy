@@ -114,22 +114,20 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
         List<ExpressionRecord> kvResults = null
         try {
             // @wsc CSV writer
-            KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray", dataType)
+            KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray-subject", dataType)
             System.err.println(System.nanoTime() + "@wsc launch hbase query **************************** ")
             if (geneList == null) {
                 kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD)
             } else {
-                Map geneMap = SQLModule.getGeneName(geneList)
-                // TODO: geneMap only contains gene symbol. need to retrieve probes
-                System.err.println("************** wsc print **********" + trialName + ", " + conceptCD + ", " + patientList.size() + ", " + geneMap.values().size());
-                kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD, new ArrayList<String>(geneMap.values()))
+                Map probes2GeneMap = SQLModule.getProbes2GeneMap(geneList)
+                kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD, new ArrayList<String>(probes2GeneMap.keySet()))
             }
-			System.err.println("@wsc hbase record number **************************** " + kvResults.size)
+
             System.err.println(System.nanoTime() + "@wsc hbase query end **************************** ")
-            kvResults.each { kvr ->
+            kvResults.each { kvRecord ->
                 // gene_id not complete, value is only raw type
                 csvWriter.writeNext(
-                        [getRowKey(subsetName, seriesName, kvr.getPatientID()), kvr.getValue(), kvr.getProbeset(), kvr.getGene()] as String[]
+                        [getRowKey(subsetName, seriesName, kvRecord.getPatientID()), kvRecord.getValue(), kvRecord.getProbeset(), probes2GeneMap.get(kvRecord.getProbeset())] as String[]
                 )
             }
         } catch (Exception e) {
@@ -178,4 +176,3 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
     }
 
 }
-

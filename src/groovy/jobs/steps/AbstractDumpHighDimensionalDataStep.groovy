@@ -113,6 +113,7 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
         String conceptCD = trial_conceptcd.get("concept_cd");
         Map subject2AnnotationMap = SQLModule.getPatientMapping(patientList, conceptCD)
         List<ExpressionRecord> kvResults = null
+        Map probes2GeneMap = null
         try {
             // @wsc CSV writer
             KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray", dataType)
@@ -120,9 +121,17 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
             if (geneList == null) {
                 kvResults = kvMrnaModule.getRecord(trialName, new ArrayList<String>(subject2AnnotationMap.keySet()), conceptCD)
             } else {
-                Map probes2GeneMap = SQLModule.getProbes2GeneMap(geneList)
                 kvResults = kvMrnaModule.getRecord(trialName, new ArrayList<String>(subject2AnnotationMap.keySet()), conceptCD, new ArrayList<String>(probes2GeneMap.keySet()))
             }
+
+            if (geneList == null) {
+                List probeList = kvMrnaModule.getAllProbeNames(trialName, subject2AnnotationMap.keySet().getAt(0), conceptCD)
+                probes2GeneMap = SQLModule.getGeneSymbol(probeList)
+            } else {
+                probes2GeneMap = SQLModule.getProbes2GeneMap(geneList)
+            }
+
+            System.err.println("************************ wsc print probe to gene map ************* " + probes2GeneMap.toMapString())
 
             System.err.println(System.nanoTime() + "@wsc hbase query end **************************** ")
             kvResults.each { kvRecord ->

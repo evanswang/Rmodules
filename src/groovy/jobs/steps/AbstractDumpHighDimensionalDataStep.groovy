@@ -107,20 +107,21 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
 
         //Sql command used to retrieve Assay IDs.
         System.err.println("before init sql **************************** " + ontologyTerm)
-        List<String> patientList = SQLModule.getPatients(resultInstanceId)
+        List<BigDecimal> patientList = SQLModule.getPatients(resultInstanceId)
         Map<String, String> trial_conceptcd = SQLModule.getTrialandConceptCD(ontologyTerm)
         String trialName = trial_conceptcd.get("study_name");
         String conceptCD = trial_conceptcd.get("concept_cd");
+        Map subject2AnnotationMap = SQLModule.getPatientMapping(patientList, conceptCD)
         List<ExpressionRecord> kvResults = null
         try {
             // @wsc CSV writer
             KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray", dataType)
             System.err.println(System.nanoTime() + "@wsc launch hbase query **************************** ")
             if (geneList == null) {
-                kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD)
+                kvResults = kvMrnaModule.getRecord(trialName, new ArrayList<String>(subject2AnnotationMap.keySet()), conceptCD)
             } else {
                 Map probes2GeneMap = SQLModule.getProbes2GeneMap(geneList)
-                kvResults = kvMrnaModule.getRecord(trialName, patientList, conceptCD, new ArrayList<String>(probes2GeneMap.keySet()))
+                kvResults = kvMrnaModule.getRecord(trialName, new ArrayList<String>(subject2AnnotationMap.keySet()), conceptCD, new ArrayList<String>(probes2GeneMap.keySet()))
             }
 
             System.err.println(System.nanoTime() + "@wsc hbase query end **************************** ")

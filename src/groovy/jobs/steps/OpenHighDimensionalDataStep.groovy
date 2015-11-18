@@ -88,13 +88,11 @@ class OpenHighDimensionalDataStep implements Step {
             List geneList = null
             if (analysisConstraints['dataConstraints']['search_keyword_ids'] != null)
                 geneList = analysisConstraints['dataConstraints']['search_keyword_ids']['keyword_ids']
-            System.err.println("@wsc print geneList element type ***************** " + geneList[0].toString());
             String dataType = analysisConstraints['projections']
-            System.err.println("kv api enabled **************************")
-            System.err.println(patientSetId.toString() + ":" + dataType.substring(2, dataType.length() - 2));
-            System.err.println(ontologyTerm);
-            System.err.println(geneList.toListString());
-            System.err.println("************* printing end **************************")
+            //System.err.println("kv api enabled **************************")
+            //System.err.println(patientSetId.toString() + ":" + dataType.substring(2, dataType.length() - 2));
+            //System.err.println(ontologyTerm);
+            //System.err.println("************* printing end **************************")
             new DefaultHighDimensionTabularResult(
                     rowsDimensionLabel:    patientSetId.toString() + ":" + dataType.substring(2, dataType.length() - 2),
                     columnsDimensionLabel: ontologyTerm,

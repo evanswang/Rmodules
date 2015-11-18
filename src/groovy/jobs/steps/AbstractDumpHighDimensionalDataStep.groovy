@@ -70,7 +70,7 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
      */
     private void writeDefaultCsv(Map<List<String>, TabularResult<AssayColumn, DataRow<AssayColumn, Object>>> results,
                                  List<String> header) {
-        System.err.println(System.nanoTime() + "@wsc revise csv writing ****************************")
+        //System.err.println(System.nanoTime() + "@wsc revise csv writing ****************************")
         withDefaultCsvWriter { CSVWriter csvWriter ->
             csvWriter.writeNext header as String[]
             if (!ConfigurationHolder.config.org.transmart.kv.enable) {
@@ -79,7 +79,7 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
                 }
             } else {
                 results.keySet().each { key ->
-                    System.err.println(System.nanoTime() + "@wsc print result key set ****************************" + key.toString())
+                    //System.err.println(System.nanoTime() + "@wsc print result key set ****************************" + key.toString())
                     doSubsetKV(key, csvWriter)
                 }
             }
@@ -106,7 +106,7 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
 
 
         //Sql command used to retrieve Assay IDs.
-        System.err.println("before init sql **************************** " + ontologyTerm)
+        //System.err.println("before init sql **************************** " + ontologyTerm)
         List<BigDecimal> patientList = SQLModule.getPatients(resultInstanceId)
         Map<String, String> trial_conceptcd = SQLModule.getTrialandConceptCD(ontologyTerm)
         String trialName = trial_conceptcd.get("study_name");
@@ -117,23 +117,22 @@ abstract class AbstractDumpHighDimensionalDataStep extends AbstractDumpStep {
         try {
             // @wsc CSV writer
             KVMrnaModule kvMrnaModule = new KVMrnaModule("microarray", dataType)
-            System.err.println(System.nanoTime() + "@wsc launch hbase query **************************** ")
+            //System.err.println(System.nanoTime() + "@wsc launch hbase query **************************** ")
+            //System.err.println(System.nanoTime() + "@wsc print subject2anno **************************** " + subject2AnnotationMap.toMapString())
             if (geneList == null) {
                 kvResults = kvMrnaModule.getRecord(trialName, new ArrayList<String>(subject2AnnotationMap.keySet()), conceptCD)
             } else {
+                probes2GeneMap = SQLModule.getProbes2GeneMap(geneList)
                 kvResults = kvMrnaModule.getRecord(trialName, new ArrayList<String>(subject2AnnotationMap.keySet()), conceptCD, new ArrayList<String>(probes2GeneMap.keySet()))
             }
 
             if (geneList == null) {
+                // get probe to gene symbol map for all probes
                 List probeList = kvMrnaModule.getAllProbeNames(trialName, subject2AnnotationMap.keySet().getAt(0), conceptCD)
                 probes2GeneMap = SQLModule.getGeneSymbol(probeList)
-            } else {
-                probes2GeneMap = SQLModule.getProbes2GeneMap(geneList)
             }
-
-            System.err.println("************************ wsc print probe to gene map ************* " + probes2GeneMap.toMapString())
-
-            System.err.println(System.nanoTime() + "@wsc hbase query end **************************** ")
+            //System.err.println("************************ wsc print probe to gene map ************* " + probes2GeneMap.toMapString())
+            //System.err.println(System.nanoTime() + "@wsc hbase query end **************************** ")
             kvResults.each { kvRecord ->
                 // gene_id not complete, value is only raw type
                 csvWriter.writeNext(
